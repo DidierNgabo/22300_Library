@@ -320,17 +320,14 @@ public class BookView extends javax.swing.JInternalFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
     public void table() {
-        Session s = util.Connection.getSessionFactory().openSession();
-        Transaction tr = s.beginTransaction();
-        List<models.Bookcategory> list = s.createQuery("from Bookcategory").list();
-        tr.commit();
+        controllers.BookCategoryDao bc = new controllers.BookCategoryDao();
         DefaultTableModel model = new DefaultTableModel();
         model = (DefaultTableModel) catTable.getModel();
         model.getDataVector().removeAllElements();
 
         Object[] obj = new Object[2];
 
-        for (models.Bookcategory cat : list) {
+        for (models.Bookcategory cat : bc.display()) {
             obj[0] = cat.getId();
             obj[1] = cat.getName();
 
@@ -338,22 +335,19 @@ public class BookView extends javax.swing.JInternalFrame {
             System.out.println("row is displayed");
 
         }
-        s.close();
 
     }
 
     public void bookTable() {
-        Session s = util.Connection.getSessionFactory().openSession();
-        Transaction tr = s.beginTransaction();
-        List<models.Books> list = s.createQuery("from Books").list();
-        tr.commit();
+        controllers.BooksDao bookdao = new controllers.BooksDao();
+        
         DefaultTableModel model = new DefaultTableModel();
         model = (DefaultTableModel) bkTable.getModel();
         model.getDataVector().removeAllElements();
 
         Object[] obj = new Object[8];
 
-        for (models.Books bk : list) {
+        for (models.Books bk : bookdao.display()) {
             obj[0] = bk.getBookId();
             obj[1] = bk.getTitle();
             obj[2] = bk.getAuthor();
@@ -366,8 +360,6 @@ public class BookView extends javax.swing.JInternalFrame {
             System.out.println("row is displayed");
 
         }
-        s.close();
-
     }
     int bookCatId;
 
@@ -385,30 +377,24 @@ public class BookView extends javax.swing.JInternalFrame {
     }
     private void catSaveBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_catSaveBtnActionPerformed
         // TODO add your handling code here:
-        Session s = util.Connection.getSessionFactory().openSession();
-        Transaction tr = s.beginTransaction();
         models.Bookcategory category = new models.Bookcategory();
         category.setName(txtCatName.getText());
-
-        s.save(category);
-        tr.commit();
-        JOptionPane.showMessageDialog(null, "book category successfully added");
-
-        s.close();
+        controllers.BookCategoryDao bcdao = new controllers.BookCategoryDao();
+        bcdao.save(category);
+        table();
 
     }//GEN-LAST:event_catSaveBtnActionPerformed
 
     private void catUpdateBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_catUpdateBtnActionPerformed
         // TODO add your handling code here:
-        Session s = util.Connection.getSessionFactory().openSession();
-        Transaction tr = s.beginTransaction();
-        models.Bookcategory category = (models.Bookcategory) s.get(models.Bookcategory.class, bookId);
+        
+        models.Bookcategory category = new models.Bookcategory();
+        category.setId(catId);
         category.setName(txtCatName.getText());
-        s.update(category);
-        tr.commit();
-        JOptionPane.showMessageDialog(null, "Book Category successfully updated!!!");
+        controllers.BookCategoryDao bc = new controllers.BookCategoryDao();
+        bc.update(category);
         table();
-        s.close();
+        
 
     }//GEN-LAST:event_catUpdateBtnActionPerformed
     int catId;
@@ -422,29 +408,13 @@ public class BookView extends javax.swing.JInternalFrame {
 
     private void delCatBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_delCatBtnActionPerformed
         // TODO add your handling code here:
-        Session s = util.Connection.getSessionFactory().openSession();
-        Transaction tr = s.beginTransaction();
-        models.Bookcategory category = (models.Bookcategory) s.get(models.Bookcategory.class, catId);
-        s.delete(category);
-        int input = JOptionPane.showConfirmDialog(null,
-                "Do you want to delete this book category?", "Select an Option...", JOptionPane.YES_NO_OPTION);
-        // 0=yes, 1=no, 2=cancel
-        System.out.println(input);
-        if (input == 0) {
-            tr.commit();
-            JOptionPane.showMessageDialog(null, "book category deleted successfully");
-            table();
-        } else {
-            JOptionPane.showMessageDialog(null, "operation cancelled");
-        }
-
-        s.close();
+        controllers.BookCategoryDao bc = new controllers.BookCategoryDao();
+        bc.delete(catId);
+        table();
     }//GEN-LAST:event_delCatBtnActionPerformed
 
     private void SaveBkBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SaveBkBtnActionPerformed
         // TODO add your handling code here:
-        Session s = util.Connection.getSessionFactory().openSession();
-        Transaction tr = s.beginTransaction();
         models.Books book = new models.Books();
 
         book.setTitle(txtBkTitle.getText());
@@ -453,12 +423,10 @@ public class BookView extends javax.swing.JInternalFrame {
         book.setDateOfPub(bkDate.getDate());
         book.setBookCategory(bkcombo.getSelectedItem().toString());
         book.setPages(Integer.valueOf(txtBkpages.getText()));
-        s.save(book);
-        tr.commit();
-        JOptionPane.showMessageDialog(null, "book  successfully added");
-
-        s.close();
-
+        
+        controllers.BooksDao bookd = new controllers.BooksDao();
+         bookd.save(book);
+         bookTable();
 
     }//GEN-LAST:event_SaveBkBtnActionPerformed
 
@@ -481,43 +449,27 @@ public class BookView extends javax.swing.JInternalFrame {
 
     private void updatebtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_updatebtnActionPerformed
         // TODO add your handling code here:
-        Session s = util.Connection.getSessionFactory().openSession();
-        Transaction tr = s.beginTransaction();
-        models.Books book = (models.Books) s.get(models.Books.class, bookId);
-
+        models.Books book=new models.Books();
+        book.setBookId(bookId);
         book.setTitle(txtBkTitle.getText());
         book.setAuthor(txtBkAuthor.getText());
         book.setPublisher(txtBkPub.getText());
         book.setDateOfPub(bkDate.getDate());
         book.setBookCategory(bkcombo.getSelectedItem().toString());
         book.setPages(Integer.valueOf(txtBkpages.getText()));
-        s.update(book);
-        tr.commit();
-        JOptionPane.showMessageDialog(null, "book updated successfully");
+        
+         controllers.BooksDao bookdao = new  controllers.BooksDao();
+        bookdao.update(book);
         bookTable();
-        s.close();
 
     }//GEN-LAST:event_updatebtnActionPerformed
 
     private void deletebtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deletebtnActionPerformed
         // TODO add your handling code here:
-        Session s = util.Connection.getSessionFactory().openSession();
-        Transaction tr = s.beginTransaction();
-        models.Books book = (models.Books) s.get(models.Books.class, bookId);
-        s.delete(book);
-        int input = JOptionPane.showConfirmDialog(null,
-                "Do you want to delete this book ?", "Select an Option...", JOptionPane.YES_NO_OPTION);
-        // 0=yes, 1=no, 2=cancel
-        System.out.println(input);
-        if (input == 0) {
-            tr.commit();
-            JOptionPane.showMessageDialog(null, "book  deleted successfully");
-            bookTable();
-        } else {
-            JOptionPane.showMessageDialog(null, "operation cancelled");
-        }
-
-        s.close();
+        controllers.BooksDao bookdao = new controllers.BooksDao();
+        bookdao.delete(bookId);
+        bookTable();
+        
         
     }//GEN-LAST:event_deletebtnActionPerformed
 
