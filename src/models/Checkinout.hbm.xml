@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<!-- Generated May 13, 2020 9:22:49 AM by Hibernate Tools 4.3.1 -->
+<hibernate-mapping>
+    <class name="models.Checkinout" table="checkinout" catalog="library_app" optimistic-lock="version">
+        <id name="id" type="java.lang.Integer">
+            <column name="id" />
+            <generator class="identity" />
+        </id>
+        <property name="bookTitle" type="string">
+            <column name="book_title" not-null="true" />
+        </property>
+        <property name="clientName" type="string">
+            <column name="client_name" not-null="true" />
+        </property>
+        <property name="status" type="string">
+            <column name="Status" not-null="true" />
+        </property>
+        <property name="checkinDate" type="date">
+            <column name="checkin_date" length="10" not-null="true" />
+        </property>
+        <property name="checkoutDate" type="date">
+            <column name="checkout_date" length="10" not-null="true" />
+        </property>
+    </class>
+</hibernate-mapping>
