@@ -24,6 +24,11 @@ public class BookView extends javax.swing.JInternalFrame {
      */
     public BookView() {
         initComponents();
+        setClosable(true);
+        setIconifiable(true);
+        setMaximizable(true);
+        setResizable(true);
+        setTitle("Books");
         table();
         loadCombo();
         bookTable();
