@@ -9,6 +9,7 @@ import java.awt.Image;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -285,7 +286,21 @@ public class ClientView extends javax.swing.JInternalFrame {
             System.out.println("No File Selected");
         }
     }//GEN-LAST:event_jButton1ActionPerformed
+    public void displayImg(){
+       Session s=util.Connection.getSessionFactory().openSession();
+       Transaction tr=s.beginTransaction();
+      models.Clients imgNew = (models.Clients)s.get(models.Clients.class, clientId);
+	byte[] bAvatar = imgNew.getPhoto();
 
+	try{
+		FileOutputStream fos = new FileOutputStream(path); 
+		fos.write(bAvatar);
+                imglabel.setIcon(new ImageIcon(bAvatar));
+		fos.close();
+	}catch(Exception e){
+		e.printStackTrace();
+	}
+    }
     private void saveBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveBtnActionPerformed
         // TODO add your handling code here:
         File file = new File(path);
