@@ -239,6 +239,8 @@ public class ClientView extends javax.swing.JInternalFrame {
         DefaultTableModel model = new DefaultTableModel();
         model = (DefaultTableModel) table.getModel();
         model.getDataVector().removeAllElements();
+       
+        
 
         Object[] obj = new Object[7];
 
@@ -248,7 +250,9 @@ public class ClientView extends javax.swing.JInternalFrame {
             obj[2] = cl.getLastname();
             obj[3] = cl.getPhone();
             obj[4] = cl.getEmail();
-            obj[5] = cl.getPhoto();
+            ImageIcon image = new ImageIcon(new ImageIcon(cl.getMyImage()).getImage()
+             .getScaledInstance(150, 120, Image.SCALE_SMOOTH) );   
+            obj[5] = image;
             obj[6] = cl.getClientCategory();
 
             model.addRow(obj);

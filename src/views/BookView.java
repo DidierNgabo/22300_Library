@@ -5,13 +5,18 @@
  */
 package views;
 
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import services.IBookCategoryService;
 
 /**
  *
@@ -345,7 +350,7 @@ public class BookView extends javax.swing.JInternalFrame {
 
     public void bookTable() {
         controllers.BooksDao bookdao = new controllers.BooksDao();
-        
+
         DefaultTableModel model = new DefaultTableModel();
         model = (DefaultTableModel) bkTable.getModel();
         model.getDataVector().removeAllElements();
@@ -382,24 +387,45 @@ public class BookView extends javax.swing.JInternalFrame {
     }
     private void catSaveBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_catSaveBtnActionPerformed
         // TODO add your handling code here:
-        models.Bookcategory category = new models.Bookcategory();
-        category.setName(txtCatName.getText());
-        controllers.BookCategoryDao bcdao = new controllers.BookCategoryDao();
-        bcdao.save(category);
+        try {
+            Registry registry = LocateRegistry.getRegistry(2000);
+            services.IBookCategoryService serv = (services.IBookCategoryService) registry.lookup("BookCategoryService");
+            models.Bookcategory category = new models.Bookcategory();
+            category.setName(txtCatName.getText());
+            boolean result = serv.insert(category);
+            System.out.println(result ? "successfully saved" : "error failed");
+            if (result) {
+                JOptionPane.showMessageDialog(null, "Book category successfully saved");
+            } else {
+                JOptionPane.showMessageDialog(null, "there is an error", "here", JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
         table();
 
     }//GEN-LAST:event_catSaveBtnActionPerformed
 
     private void catUpdateBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_catUpdateBtnActionPerformed
         // TODO add your handling code here:
-        
-        models.Bookcategory category = new models.Bookcategory();
-        category.setId(catId);
-        category.setName(txtCatName.getText());
-        controllers.BookCategoryDao bc = new controllers.BookCategoryDao();
-        bc.update(category);
-        table();
-        
+        try {
+            models.Bookcategory category = new models.Bookcategory();
+            category.setId(catId);
+            category.setName(txtCatName.getText());
+            Registry registry = LocateRegistry.getRegistry(2000);
+            IBookCategoryService bkcat = (IBookCategoryService) registry.lookup("BookCategoryService");
+            boolean result = bkcat.update(category);
+            System.out.println(result ? "updated" : "failed to update");
+            if (result) {
+                JOptionPane.showMessageDialog(null, "Book category successfully saved");
+            } else {
+                JOptionPane.showMessageDialog(null, "there is an error", "here", JOptionPane.ERROR_MESSAGE);
+            }
+            table();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
 
     }//GEN-LAST:event_catUpdateBtnActionPerformed
     int catId;
@@ -413,8 +439,25 @@ public class BookView extends javax.swing.JInternalFrame {
 
     private void delCatBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_delCatBtnActionPerformed
         // TODO add your handling code here:
-        controllers.BookCategoryDao bc = new controllers.BookCategoryDao();
-        bc.delete(catId);
+        
+        try{
+         Registry registry = LocateRegistry.getRegistry(2000);
+         IBookCategoryService bkcat= (IBookCategoryService) registry.lookup("BookCategoryService");
+         int input = JOptionPane.showConfirmDialog(null,
+                    "Do you want to delete this book category ?", "Select an Option...", JOptionPane.YES_NO_OPTION);
+            // 0=yes, 1=no, 2=cancel
+            System.out.println(input);
+            if (input == 0) {
+                boolean result = bkcat.delete(catId);
+                System.out.println(result ? "deleted successfully " : "failed to delete");
+                JOptionPane.showMessageDialog(null, "book category  deleted successfully");
+            } else {
+                JOptionPane.showMessageDialog(null, "operation cancelled");
+            }
+
+        } catch(Exception ex){
+          ex.printStackTrace();
+        }
         table();
     }//GEN-LAST:event_delCatBtnActionPerformed
 
@@ -428,10 +471,21 @@ public class BookView extends javax.swing.JInternalFrame {
         book.setDateOfPub(bkDate.getDate());
         book.setBookCategory(bkcombo.getSelectedItem().toString());
         book.setPages(Integer.valueOf(txtBkpages.getText()));
-        
-        controllers.BooksDao bookd = new controllers.BooksDao();
-         bookd.save(book);
-         bookTable();
+
+        try {
+            Registry registry = LocateRegistry.getRegistry("localhost", 2000);
+            services.IBookService bkserv = (services.IBookService) registry.lookup("BookService");
+            boolean result = bkserv.insert(book);
+            System.out.println(result ? "saved successfully " : "failed to save");
+            if (result) {
+                JOptionPane.showMessageDialog(null, "book  successfully added");
+            } else {
+                JOptionPane.showMessageDialog(null, "failed to save book");
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        bookTable();
 
     }//GEN-LAST:event_SaveBkBtnActionPerformed
 
@@ -454,7 +508,7 @@ public class BookView extends javax.swing.JInternalFrame {
 
     private void updatebtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_updatebtnActionPerformed
         // TODO add your handling code here:
-        models.Books book=new models.Books();
+        models.Books book = new models.Books();
         book.setBookId(bookId);
         book.setTitle(txtBkTitle.getText());
         book.setAuthor(txtBkAuthor.getText());
@@ -462,8 +516,20 @@ public class BookView extends javax.swing.JInternalFrame {
         book.setDateOfPub(bkDate.getDate());
         book.setBookCategory(bkcombo.getSelectedItem().toString());
         book.setPages(Integer.valueOf(txtBkpages.getText()));
-        
-         controllers.BooksDao bookdao = new  controllers.BooksDao();
+        try {
+            Registry registry = LocateRegistry.getRegistry(2000);
+            services.IBookService bksrv = (services.IBookService) registry.lookup("BookService");
+            boolean result = bksrv.update(book);
+            if (result) {
+                JOptionPane.showMessageDialog(null, "book updated successfully");
+            } else {
+                JOptionPane.showMessageDialog(null, "book not updated");
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        controllers.BooksDao bookdao = new controllers.BooksDao();
         bookdao.update(book);
         bookTable();
 
@@ -471,11 +537,27 @@ public class BookView extends javax.swing.JInternalFrame {
 
     private void deletebtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deletebtnActionPerformed
         // TODO add your handling code here:
-        controllers.BooksDao bookdao = new controllers.BooksDao();
-        bookdao.delete(bookId);
+        try {
+            Registry registry = LocateRegistry.getRegistry("localhost", 2000);
+            services.IBookService bkserv = (services.IBookService) registry.lookup("BookService");
+            int input = JOptionPane.showConfirmDialog(null,
+                    "Do you want to delete this book ?", "Select an Option...", JOptionPane.YES_NO_OPTION);
+            // 0=yes, 1=no, 2=cancel
+            System.out.println(input);
+            if (input == 0) {
+                boolean result = bkserv.delete(bookId);
+                System.out.println(result ? "deleted successfully " : "failed to delete");
+                JOptionPane.showMessageDialog(null, "book  deleted successfully");
+            } else {
+                JOptionPane.showMessageDialog(null, "operation cancelled");
+            }
+
+        } catch (Exception ex) {
+            Logger.getLogger(signUpForm.class.getName()).log(Level.SEVERE, null, ex);
+        }
         bookTable();
-        
-        
+
+
     }//GEN-LAST:event_deletebtnActionPerformed
 
 

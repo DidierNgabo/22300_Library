@@ -37,6 +37,11 @@ public class Checkinout extends javax.swing.JInternalFrame {
      */
     public Checkinout() {
         initComponents();
+        setClosable(true);
+        setIconifiable(true);
+        setMaximizable(true);
+        setResizable(true);
+        setTitle("Check in And Check out");
         bookCombo();
         clientCombo();
         table();
@@ -89,7 +94,7 @@ public class Checkinout extends javax.swing.JInternalFrame {
 
             },
             new String [] {
-                "Id", "Client Name", "Book Title", "status", "date"
+                "Id", "Client Name", "Book Title", "status", "checkin_date", "checkout_date"
             }
         ));
         table.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -117,7 +122,7 @@ public class Checkinout extends javax.swing.JInternalFrame {
                 .addComponent(jButton2)
                 .addGap(58, 58, 58)
                 .addComponent(pdfbtn)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(249, Short.MAX_VALUE))
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -133,9 +138,9 @@ public class Checkinout extends javax.swing.JInternalFrame {
                     .addGroup(layout.createSequentialGroup()
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(clientcombo, javax.swing.GroupLayout.PREFERRED_SIZE, 106, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 51, Short.MAX_VALUE)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 408, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(25, 25, 25))
+                .addGap(18, 18, 18)
+                .addComponent(jScrollPane1)
+                .addGap(4, 4, 4))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -163,7 +168,7 @@ public class Checkinout extends javax.swing.JInternalFrame {
                     .addComponent(checkinbtn)
                     .addComponent(jButton2)
                     .addComponent(pdfbtn))
-                .addContainerGap(161, Short.MAX_VALUE))
+                .addContainerGap(165, Short.MAX_VALUE))
         );
 
         pack();
@@ -203,7 +208,7 @@ public class Checkinout extends javax.swing.JInternalFrame {
         model = (DefaultTableModel) table.getModel();
         model.getDataVector().removeAllElements();
 
-        Object[] obj = new Object[5];
+        Object[] obj = new Object[6];
 
         for (models.Checkinout op : list) {
             obj[0] = op.getId();
@@ -211,6 +216,7 @@ public class Checkinout extends javax.swing.JInternalFrame {
             obj[2] = op.getClientName();
             obj[3] = op.getStatus();
             obj[4] = op.getCheckinDate();
+            obj[5] = op.getCheckoutDate();
 
             model.addRow(obj);
             System.out.println("row is displayed");
@@ -218,6 +224,11 @@ public class Checkinout extends javax.swing.JInternalFrame {
         }
         s.close();
 
+    }
+
+    public Date addDays(Date d, int days) {
+        d.setTime(d.getTime() + days * 1000 * 60 * 60 * 24);
+        return d;
     }
     private void checkinbtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_checkinbtnActionPerformed
         // TODO add your handling code here:
@@ -227,8 +238,9 @@ public class Checkinout extends javax.swing.JInternalFrame {
         operation.setBookTitle(bookcombo.getSelectedItem().toString());
         operation.setClientName(clientcombo.getSelectedItem().toString());
         operation.setStatus("Check in");
+        Date checkIn = date.getDate();
         operation.setCheckinDate(date.getDate());
-        operation.setCheckoutDate(date.getDate());
+        operation.setCheckoutDate(addDays(checkIn, 20));
 
         s.save(operation);
         tr.commit();
@@ -254,7 +266,6 @@ public class Checkinout extends javax.swing.JInternalFrame {
         Transaction tr = s.beginTransaction();
         models.Checkinout operation = (models.Checkinout) s.get(models.Checkinout.class, opId);
 
-        operation.setCheckinDate(date.getDate());
         operation.setCheckoutDate(date.getDate());
         operation.setStatus("check out");
         s.update(operation);
@@ -281,9 +292,9 @@ public class Checkinout extends javax.swing.JInternalFrame {
 
             document.open();
             //simple paragraph
-            Font bold = new Font(Font.FontFamily.TIMES_ROMAN,20,Font.BOLD);
-            Font smallBold = new Font(Font.FontFamily.TIMES_ROMAN,13,Font.BOLD);
-            Paragraph para = new Paragraph("This is  from library app",bold);
+            Font bold = new Font(Font.FontFamily.TIMES_ROMAN, 20, Font.BOLD);
+            Font smallBold = new Font(Font.FontFamily.TIMES_ROMAN, 11, Font.BOLD);
+            Paragraph para = new Paragraph("This is  from library app", bold);
             para.setAlignment(Element.ALIGN_CENTER);
             document.add(para);
             document.add(new Paragraph(" "));
@@ -291,26 +302,31 @@ public class Checkinout extends javax.swing.JInternalFrame {
             document.add(new Paragraph(" "));
             document.add(new Paragraph(" "));
             // add table
-            PdfPTable table = new PdfPTable(5);
-            PdfPCell c1 = new PdfPCell(new Phrase("id",smallBold));
+            PdfPTable table = new PdfPTable(6);
+            table.setWidthPercentage(100);
+            PdfPCell c1 = new PdfPCell(new Phrase("id", smallBold));
             c1.setBackgroundColor(BaseColor.LIGHT_GRAY);
             table.addCell(c1);
 
-            c1 = new PdfPCell(new Phrase("Client Name",smallBold));
-             c1.setBackgroundColor(BaseColor.LIGHT_GRAY);
+            c1 = new PdfPCell(new Phrase("Client Name", smallBold));
+            c1.setBackgroundColor(BaseColor.LIGHT_GRAY);
             table.addCell(c1);
 
-            c1 = new PdfPCell(new Phrase("Book Title",smallBold));
-             c1.setBackgroundColor(BaseColor.LIGHT_GRAY);
-             
+            c1 = new PdfPCell(new Phrase("Book Title", smallBold));
+            c1.setBackgroundColor(BaseColor.LIGHT_GRAY);
+
             table.addCell(c1);
 
-            c1 = new PdfPCell(new Phrase("Status",smallBold));
-             c1.setBackgroundColor(BaseColor.LIGHT_GRAY);
+            c1 = new PdfPCell(new Phrase("Status", smallBold));
+            c1.setBackgroundColor(BaseColor.LIGHT_GRAY);
             table.addCell(c1);
 
-            c1 = new PdfPCell(new Phrase("Date",smallBold));
-             c1.setBackgroundColor(BaseColor.LIGHT_GRAY);
+            c1 = new PdfPCell(new Phrase("Checkin_Date", smallBold));
+            c1.setBackgroundColor(BaseColor.LIGHT_GRAY);
+            table.addCell(c1);
+
+            c1 = new PdfPCell(new Phrase("Checkout_Date", smallBold));
+            c1.setBackgroundColor(BaseColor.LIGHT_GRAY);
             table.addCell(c1);
             table.setHeaderRows(1);
             for (models.Checkinout chk : list) {
@@ -319,12 +335,13 @@ public class Checkinout extends javax.swing.JInternalFrame {
                 table.addCell(chk.getClientName());
                 table.addCell(chk.getStatus());
                 table.addCell(chk.getCheckinDate().toString());
+                table.addCell(chk.getCheckoutDate().toString());
             }
 
             document.add(table);
+
             //add image 
 //            document.add(Image.getInstance("E:\\auca\\sem5\\java\\linux.png"));
-            
             document.close();
             System.out.println("finished");
             JOptionPane.showMessageDialog(null, "file successfully exported");

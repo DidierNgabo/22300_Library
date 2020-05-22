@@ -78,9 +78,9 @@ public class Clients  implements java.io.Serializable {
     public void setClientCategory(String clientCategory) {
         this.clientCategory = clientCategory;
     }
-
-
-
+public byte[] getMyImage(){
+        return photo;
+    }
 
 }
 
